@@ -16,6 +16,7 @@ import * as Device from 'expo-device';
 import { GameProvider } from './src/context/GameContext';
 import { RootNavigator } from './src/app/navigation/RootNavigator';
 import { initSounds } from './src/utils/sound';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -66,11 +67,13 @@ export default function App() {
   }
 
   return (
-    <GameProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <RootNavigator />
-      </NavigationContainer>
-    </GameProvider>
+    <SafeAreaProvider>
+      <GameProvider>
+        <NavigationContainer>
+          <StatusBar style="dark" />
+          <RootNavigator />
+        </NavigationContainer>
+      </GameProvider>
+    </SafeAreaProvider>
   );
 }

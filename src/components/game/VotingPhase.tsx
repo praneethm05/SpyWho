@@ -1,8 +1,9 @@
 /**
  * VotingPhase — displays a grid of players for a specific voter to pick their suspect.
  */
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Player } from '../../types/game.types';
 import { Colors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
 import { Chip } from '../common/Chip';
@@ -17,8 +18,31 @@ interface VotingPhaseProps {
 }
 
 export function VotingPhase({ voterName, players, voterId, onVote }: VotingPhaseProps) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
   // Suspects are everyone EXCEPT the current voter
   const suspects = players.filter(p => p.id !== voterId);
+
+  const handleVotePress = useCallback((suspectId: string) => {
+    if (selectedId) return; // Prevent double taps
+
+    setSelectedId(suspectId);
+    playClickSound();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Scale down then back
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 0.94, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+    ]).start();
+
+    // Small delay to let them see the selection before UI re-renders for next voter
+    setTimeout(() => {
+      onVote(suspectId);
+      setSelectedId(null);
+    }, 400);
+  }, [onVote, selectedId, scaleAnim]);
 
   return (
     <View style={styles.container}>
@@ -33,20 +57,41 @@ export function VotingPhase({ voterName, players, voterId, onVote }: VotingPhase
       <Text style={styles.prompt}>Select your top suspect:</Text>
 
       <View style={styles.grid}>
-        {suspects.map((suspect) => (
-          <TouchableOpacity
-            key={suspect.id}
-            style={styles.suspectItem}
-            onPress={() => {
-              playClickSound();
-              onVote(suspect.id);
-            }}
-            activeOpacity={0.7}
-          >
-            <UserCircle size={28} color={Colors.primary} weight="duotone" />
-            <Text style={styles.suspectName} numberOfLines={1}>{suspect.name}</Text>
-          </TouchableOpacity>
-        ))}
+        {suspects.map((suspect) => {
+          const isSelected = selectedId === suspect.id;
+          return (
+            <Animated.View 
+              key={suspect.id} 
+              style={[
+                styles.suspectWrapper,
+                isSelected && { transform: [{ scale: scaleAnim }] }
+              ]}
+            >
+              <Pressable
+                style={[
+                  styles.suspectItem,
+                  isSelected && styles.suspectItemActive
+                ]}
+                onPress={() => handleVotePress(suspect.id)}
+              >
+                <UserCircle 
+                  size={28} 
+                  color={isSelected ? Colors.textOnPrimary : Colors.primary} 
+                  weight={isSelected ? "fill" : "duotone"} 
+                />
+                <Text 
+                  style={[
+                    styles.suspectName,
+                    isSelected && { color: Colors.textOnPrimary }
+                  ]} 
+                  numberOfLines={1}
+                >
+                  {suspect.name}
+                </Text>
+              </Pressable>
+            </Animated.View>
+          );
+        })}
       </View>
     </View>
   );
@@ -91,8 +136,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     justifyContent: 'center',
   },
-  suspectItem: {
+  suspectWrapper: {
     width: '45%',
+  },
+  suspectItem: {
+    width: '100%',
     backgroundColor: Colors.background,
     padding: Spacing.md,
     borderRadius: Radius.md,
@@ -101,6 +149,11 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  suspectItemActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    ...Shadows.md,
   },
   suspectName: {
     ...Typography.bodyBold,

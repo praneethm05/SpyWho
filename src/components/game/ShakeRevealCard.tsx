@@ -3,6 +3,7 @@
  */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
@@ -29,6 +30,7 @@ export function ShakeRevealCard({
   onDone,
   playerName,
 }: ShakeRevealCardProps) {
+  const insets = useSafeAreaInsets();
   const [isRevealed, setIsRevealed] = useState(false);
   const cardScale = useRef(new Animated.Value(0.9)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
@@ -134,7 +136,7 @@ export function ShakeRevealCard({
 
   if (isRevealed) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, Spacing.xxxl) }]}>
         <AnimatedGradient
           colors={isSpy ? spyCardGradient : normalCardGradient}
           style={[
@@ -180,7 +182,7 @@ export function ShakeRevealCard({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, Spacing.xxxl) }]}>
       <AnimatedGradient
         colors={shakeGradient}
         style={[

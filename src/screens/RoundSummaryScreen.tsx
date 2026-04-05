@@ -3,6 +3,7 @@
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, ScrollView, AppState } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation.types';
@@ -20,6 +21,7 @@ type SummaryNav = NativeStackNavigationProp<RootStackParamList, 'RoundSummary'>;
 
 export function RoundSummaryScreen() {
   const navigation = useNavigation<SummaryNav>();
+  const insets = useSafeAreaInsets();
   const { state, finishRound, initializeGame } = useGameEngine();
   const [spyRevealed, setSpyRevealed] = useState(false);
   const [isAlarmActive, setIsAlarmActive] = useState(false);
@@ -147,7 +149,10 @@ export function RoundSummaryScreen() {
     <View style={styles.screen}>
       <Header title="Results" />
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: Math.max(insets.bottom, Spacing.massive) }
+        ]}
         showsVerticalScrollIndicator={false}
       >
 

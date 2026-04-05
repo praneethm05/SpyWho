@@ -15,6 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation.types';
 import { useGameEngine } from '../hooks/useGameEngine';
@@ -27,6 +28,7 @@ type PlayerNamesNav = NativeStackNavigationProp<RootStackParamList, 'PlayerNames
 
 export function PlayerNamesScreen() {
   const navigation = useNavigation<PlayerNamesNav>();
+  const insets = useSafeAreaInsets();
   const { state, initializeGame } = useGameEngine();
   const { playerCount } = state.config;
 
@@ -88,7 +90,10 @@ export function PlayerNamesScreen() {
       <Header title="Player Names" showBack />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: 120 + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -128,7 +133,7 @@ export function PlayerNamesScreen() {
         ))}
       </ScrollView>
 
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, Spacing.xl) }]}>
         <Button
           title="Start Game"
           onPress={handleStartGame}

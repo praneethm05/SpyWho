@@ -10,7 +10,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   customWords: [],
   timerSeconds: 60,
   revealMode: RevealMode.SHAKE,
-  shakeThreshold: 3,
+  shakeThreshold: 1,
   isMarlMode: false,
   isVotingMode: false,
 };

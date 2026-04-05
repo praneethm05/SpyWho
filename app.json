@@ -16,6 +16,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.praneethm.spywho",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -27,7 +28,17 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Fredoka-Regular.ttf",
+            "./assets/fonts/Fredoka-Medium.ttf",
+            "./assets/fonts/Fredoka-SemiBold.ttf",
+            "./assets/fonts/Fredoka-Bold.ttf"
+          ]
+        }
+      ],
       [
         "expo-audio",
         {

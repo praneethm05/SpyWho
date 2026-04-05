@@ -3,6 +3,7 @@
  */
 import React, { useRef, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
@@ -24,6 +25,7 @@ export function FlipRevealCard({
   onDone,
   playerName,
 }: FlipRevealCardProps) {
+  const insets = useSafeAreaInsets();
   const [isFlipped, setIsFlipped] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef(false);
@@ -137,7 +139,9 @@ export function FlipRevealCard({
             <Text style={styles.spySubtitle}>
               Blend in. Don't get caught.
             </Text>
-            <Text style={styles.flipBackHintSpy}>Tap card to close & automatically pass</Text>
+            <Text style={[styles.flipBackHintSpy, { bottom: Math.max(insets.bottom, Spacing.xxxl) }]}>
+              Tap card to close & automatically pass
+            </Text>
           </AnimatedGradient>
         ) : (
           <Animated.View
@@ -153,7 +157,9 @@ export function FlipRevealCard({
           >
             <Text style={styles.wordLabel}>Your word is</Text>
             <Text style={styles.wordText}>{word}</Text>
-            <Text style={styles.flipBackHintNormal}>Tap card to close & automatically pass</Text>
+            <Text style={[styles.flipBackHintNormal, { bottom: Math.max(insets.bottom, Spacing.xxxl) }]}>
+              Tap card to close & automatically pass
+            </Text>
           </Animated.View>
         )}
       </Pressable>

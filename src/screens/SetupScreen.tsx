@@ -6,6 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation.types';
@@ -33,6 +34,7 @@ type SetupNav = NativeStackNavigationProp<RootStackParamList, 'Setup'>;
 
 export function SetupScreen() {
   const navigation = useNavigation<SetupNav>();
+  const insets = useSafeAreaInsets();
   const { state, dispatch } = useGameContext();
   const { config } = state;
   const [showValidation, setShowValidation] = React.useState(false);
@@ -134,7 +136,10 @@ export function SetupScreen() {
       <Header title="Game Setup" showBack />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: 140 + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -224,7 +229,7 @@ export function SetupScreen() {
       </ScrollView>
 
       {/* ── Bottom CTA ── */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, Spacing.xl) }]}>
         <Button
           title="Next: Enter Names"
           onPress={handleNext}

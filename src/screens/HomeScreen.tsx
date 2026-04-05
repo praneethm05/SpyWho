@@ -4,6 +4,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation.types';
 import { Colors, Spacing, Typography, Radius, Shadows } from '../constants/theme';
@@ -14,6 +15,7 @@ type HomeNav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export function HomeScreen() {
   const navigation = useNavigation<HomeNav>();
+  const insets = useSafeAreaInsets();
 
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(20)).current;
@@ -105,7 +107,7 @@ export function HomeScreen() {
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, Spacing.huge) }]}>
         <Text style={styles.credit}>Crafted by Praneeth M</Text>
       </View>
     </Animated.View>
