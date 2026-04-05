@@ -19,7 +19,6 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-notifications": "~0.32.16",
     "expo-sensors": "~15.0.8",
-    "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "phosphor-react-native": "^3.0.4",
     "react": "19.1.0",

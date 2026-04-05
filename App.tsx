@@ -10,15 +10,12 @@ import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { GameProvider } from './src/context/GameContext';
 import { RootNavigator } from './src/app/navigation/RootNavigator';
 import { initSounds } from './src/utils/sound';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-SplashScreen.preventAutoHideAsync();
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -55,8 +52,6 @@ export default function App() {
             console.log('Failed to get push token for push notification!');
           }
         }
-
-        await SplashScreen.hideAsync();
       }
     }
     loadResources();
