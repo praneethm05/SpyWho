@@ -28,7 +28,7 @@ export function RoundSummaryScreen() {
   
   // Voting state
   const [currentVoterIndex, setCurrentVoterIndex] = useState(0);
-  const [votes, setVotes] = useState<Record<string, string>>({}); // VoterID -> SuspectID
+  const [votes, setVotes] = useState<Record<string, string[]>>({}); // VoterID -> SuspectIDs[]
   const [isVotingFinished, setIsVotingFinished] = useState(!state.config.isVotingMode);
 
   const { formattedTime, isRunning, start, pause } = useCountdownTimer({
@@ -119,9 +119,9 @@ export function RoundSummaryScreen() {
     );
   }, [navigation]);
 
-  const handleCastVote = useCallback((suspectId: string) => {
+  const handleCastVote = useCallback((suspectIds: string[]) => {
     const voterId = state.players[currentVoterIndex].id;
-    setVotes(prev => ({ ...prev, [voterId]: suspectId }));
+    setVotes(prev => ({ ...prev, [voterId]: suspectIds }));
 
     if (currentVoterIndex < state.players.length - 1) {
       setCurrentVoterIndex(prev => prev + 1);
@@ -132,8 +132,10 @@ export function RoundSummaryScreen() {
 
   const getVoteTally = () => {
     const tally: Record<string, number> = {};
-    Object.values(votes).forEach(suspectId => {
-      tally[suspectId] = (tally[suspectId] || 0) + 1;
+    Object.values(votes).forEach(suspectIds => {
+      suspectIds.forEach(suspectId => {
+        tally[suspectId] = (tally[suspectId] || 0) + 1;
+      });
     });
     return tally;
   };
@@ -200,6 +202,7 @@ export function RoundSummaryScreen() {
             voterId={state.players[currentVoterIndex].id}
             players={state.players}
             onVote={handleCastVote}
+            maxVotes={state.config.spyCount}
           />
         )}
 

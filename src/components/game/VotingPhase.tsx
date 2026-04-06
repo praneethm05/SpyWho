@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Player } from '../../types/game.types';
 import { Colors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
+import { Button } from '../common/Button';
 import { Chip } from '../common/Chip';
 import { UserCircle, Fingerprint } from 'phosphor-react-native';
 import { playClickSound } from '../../utils/sound';
@@ -13,58 +14,88 @@ import { playClickSound } from '../../utils/sound';
 interface VotingPhaseProps {
   voterName: string;
   players: Player[];
-  onVote: (suspectId: string) => void;
+  onVote: (suspectIds: string[]) => void;
   voterId: string;
+  maxVotes: number;
 }
 
-export function VotingPhase({ voterName, players, voterId, onVote }: VotingPhaseProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+export function VotingPhase({ voterName, players, voterId, onVote, maxVotes }: VotingPhaseProps) {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const scaleAnims = useRef<Record<string, Animated.Value>>({}).current;
+
+  // Initialize scale animation for each player
+  players.forEach(p => {
+    if (!scaleAnims[p.id]) {
+      scaleAnims[p.id] = new Animated.Value(1);
+    }
+  });
 
   // Suspects are everyone EXCEPT the current voter
   const suspects = players.filter(p => p.id !== voterId);
 
-  const handleVotePress = useCallback((suspectId: string) => {
-    if (selectedId) return; // Prevent double taps
+  const toggleSuspect = useCallback((suspectId: string) => {
+    const isSelected = selectedIds.includes(suspectId);
 
-    setSelectedId(suspectId);
+    if (!isSelected && selectedIds.length >= maxVotes) {
+      // Don't allow more than maxVotes
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
+
     playClickSound();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    // Scale down then back
+    // Animate the tap
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.94, duration: 100, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnims[suspectId], { toValue: 0.94, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnims[suspectId], { toValue: 1, duration: 100, useNativeDriver: true }),
     ]).start();
 
-    // Small delay to let them see the selection before UI re-renders for next voter
-    setTimeout(() => {
-      onVote(suspectId);
-      setSelectedId(null);
-    }, 400);
-  }, [onVote, selectedId, scaleAnim]);
+    setSelectedIds(prev =>
+      isSelected
+        ? prev.filter(id => id !== suspectId)
+        : [...prev, suspectId]
+    );
+  }, [selectedIds, maxVotes, scaleAnims]);
+
+  const handleConfirm = useCallback(() => {
+    if (selectedIds.length !== maxVotes) return;
+    onVote(selectedIds);
+    setSelectedIds([]);
+  }, [onVote, selectedIds, maxVotes]);
+
+  const votesRemaining = maxVotes - selectedIds.length;
 
   return (
     <View style={styles.container}>
       <View style={styles.cardHeader}>
         <Fingerprint size={32} color={Colors.primary} weight="duotone" />
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.turnLabel}>Whose turn to vote?</Text>
           <Text style={styles.voterName}>{voterName}</Text>
         </View>
+        {maxVotes > 1 && (
+          <View style={styles.voteCountBadge}>
+             <Text style={styles.voteCountValue}>{selectedIds.length}/{maxVotes}</Text>
+          </View>
+        )}
       </View>
 
-      <Text style={styles.prompt}>Select your top suspect:</Text>
+      <Text style={styles.prompt}>
+        {maxVotes === 1 
+          ? "Select your top suspect:" 
+          : `Select exactly ${maxVotes} suspects:`}
+      </Text>
 
       <View style={styles.grid}>
         {suspects.map((suspect) => {
-          const isSelected = selectedId === suspect.id;
+          const isSelected = selectedIds.includes(suspect.id);
           return (
             <Animated.View 
               key={suspect.id} 
               style={[
                 styles.suspectWrapper,
-                isSelected && { transform: [{ scale: scaleAnim }] }
+                { transform: [{ scale: scaleAnims[suspect.id] }] }
               ]}
             >
               <Pressable
@@ -72,7 +103,7 @@ export function VotingPhase({ voterName, players, voterId, onVote }: VotingPhase
                   styles.suspectItem,
                   isSelected && styles.suspectItemActive
                 ]}
-                onPress={() => handleVotePress(suspect.id)}
+                onPress={() => toggleSuspect(suspect.id)}
               >
                 <UserCircle 
                   size={28} 
@@ -92,6 +123,19 @@ export function VotingPhase({ voterName, players, voterId, onVote }: VotingPhase
             </Animated.View>
           );
         })}
+      </View>
+
+      {/* Action Button */}
+      <View style={styles.footer}>
+        <Button 
+          title={votesRemaining > 0 
+            ? `Select ${votesRemaining} more` 
+            : "Confirm Votes"} 
+          onPress={handleConfirm}
+          disabled={selectedIds.length !== maxVotes}
+          fullWidth
+          size="md"
+        />
       </View>
     </View>
   );
@@ -123,6 +167,17 @@ const styles = StyleSheet.create({
   },
   voterName: {
     ...Typography.h2,
+    color: Colors.primary,
+  },
+  voteCountBadge: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 4,
+    borderRadius: Radius.round,
+  },
+  voteCountValue: {
+    ...Typography.caption,
+    fontFamily: 'Fredoka-Bold',
     color: Colors.primary,
   },
   prompt: {
@@ -159,4 +214,7 @@ const styles = StyleSheet.create({
     ...Typography.bodyBold,
     color: Colors.textPrimary,
   },
+  footer: {
+    marginTop: Spacing.sm,
+  }
 });
