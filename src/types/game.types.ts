@@ -62,6 +62,8 @@ export interface GameConfig {
   isMarlMode: boolean;
   /** Whether to enable a voting round before the final reveal */
   isVotingMode: boolean;
+  /** Stores player names from the last game to re-use or default to */
+  previousPlayerNames: string[];
 }
 
 export interface GameState {

@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   shakeThreshold: 1,
   isMarlMode: false,
   isVotingMode: false,
+  previousPlayerNames: [],
 };
 
 export const INITIAL_GAME_STATE: GameState = {

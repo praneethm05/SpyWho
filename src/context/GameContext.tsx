@@ -36,6 +36,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         secretWord: action.payload.secretWord,
         currentPlayerIndex: 0,
         phase: GamePhase.REVEALING,
+        config: { ...state.config, previousPlayerNames: action.payload.players.map(p => p.name) },
       };
 
     case 'REVEAL_CURRENT': {
@@ -69,7 +70,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESET':
       return {
         ...INITIAL_GAME_STATE,
-        config: { ...INITIAL_GAME_STATE.config },
+        config: { ...INITIAL_GAME_STATE.config, previousPlayerNames: state.config.previousPlayerNames },
       };
 
     default:

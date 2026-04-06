@@ -22,6 +22,7 @@ interface TextInputProps {
   returnKeyType?: 'done' | 'next' | 'go';
   style?: ViewStyle;
   maxLength?: number;
+  editable?: boolean;
 }
 
 export function TextInput({
@@ -34,6 +35,7 @@ export function TextInput({
   returnKeyType = 'done',
   style,
   maxLength,
+  editable = true,
 }: TextInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const borderAnim = useRef(new Animated.Value(0)).current;
@@ -91,6 +93,7 @@ export function TextInput({
           returnKeyType={returnKeyType}
           style={styles.input}
           maxLength={maxLength}
+          editable={editable}
           autoCorrect={false}
           autoCapitalize="words"
         />

@@ -10,12 +10,14 @@ export interface HeaderProps {
   title?: string;
   showBack?: boolean;
   onBack?: () => void;
+  rightElement?: React.ReactNode;
 }
 
 export function Header({ 
   title = "SpyWho", 
   showBack = false, 
-  onBack 
+  onBack,
+  rightElement,
 }: HeaderProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -49,8 +51,10 @@ export function Header({
           <Text style={styles.title}>{title}</Text>
         </View>
 
-        {/* Right placeholder to keep title perfectly centered */}
-        <View style={styles.placeholder} />
+        {/* Right area, either an element or a placeholder to keep title centered */}
+        <View style={styles.rightContainer}>
+          {rightElement}
+        </View>
       </View>
     </View>
   );
@@ -73,12 +77,17 @@ const styles = StyleSheet.create({
   backButton: {
     padding: Spacing.xs,
     marginLeft: -Spacing.xs,
-    width: 40,
+    width: 60,
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
   placeholder: {
-    width: 40,
+    width: 60,
+  },
+  rightContainer: {
+    width: 60,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   titleContainer: {
     flex: 1,
